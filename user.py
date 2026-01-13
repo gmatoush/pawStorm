@@ -1,0 +1,70 @@
+
+# Class made to create the person
+import pygame
+
+class User(pygame.sprite.Sprite):
+
+    # Initialize the sprite
+    def __init__(self, floor_height, screen_height, screen_width, user_width, user_height):
+
+        # Call the parent class
+        pygame.sprite.Sprite.__init__(self)
+
+        # Store important sprite variables
+        self.floor_height = floor_height
+        self.pos_x = screen_width // 2 + (user_width // 2)
+        self.pos_y = floor_height
+        self.jump_percent = 0.1
+        self.user_width = user_width
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.jump_status = False
+        self.jump = self.screen_height * 0.15
+        self.speed = self.screen_width * 0.01
+
+        # Create an image of the person
+        self.img = None # placeholder for actual sprite
+        self.image = pygame.Surface([user_width, user_height])
+        self.image.fill("black")
+
+        # Put user rectangle on the floor
+        self.rect = self.image.get_rect()
+        self.rect.bottom = self.pos_y
+        self.rect.right = self.pos_x
+
+    # Function updating the position of the user
+    def update(self):
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_a]:
+            
+            # make sure player cannot exit the screen
+            if self.pos_x >= self.user_width:
+                self.pos_x -= self.speed
+        
+        if keys[pygame.K_d]:
+
+            # make sure player cannot exit the screen
+            if self.pos_x <= self.screen_width:
+                self.pos_x += self.speed
+
+        if keys[pygame.K_w]:
+
+            # mark jump boolean true
+            if self.pos_y == self.floor_height:
+                self.jump_status = True
+
+        # Calculate slow jump up and jump down
+        max_jump = self.floor_height - self.jump
+        if self.jump_status and self.pos_y <= max_jump:
+            self.jump_status = False
+
+        elif self.jump_status and self.pos_y != max_jump:
+            self.pos_y -= self.jump * self.jump_percent
+
+        elif self.pos_y != self.floor_height:
+            self.pos_y += self.jump * self.jump_percent
+
+
+        self.rect.bottom = self.pos_y
+        self.rect.right = self.pos_x
