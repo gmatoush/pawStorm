@@ -36,19 +36,19 @@ class User(pygame.sprite.Sprite):
     def update(self):
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_a]:
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             
             # make sure player cannot exit the screen
             if self.pos_x >= self.user_width:
                 self.pos_x -= self.speed
         
-        if keys[pygame.K_d]:
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
 
             # make sure player cannot exit the screen
             if self.pos_x <= self.screen_width:
                 self.pos_x += self.speed
 
-        if keys[pygame.K_w]:
+        if keys[pygame.K_w] or keys[pygame.K_UP]:
 
             # mark jump boolean true
             if self.pos_y == self.floor_height:
