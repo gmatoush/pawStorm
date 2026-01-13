@@ -2,6 +2,7 @@
 import pygame
 import ground
 import user
+import rain
 
 # pygame setup
 pygame.init()
@@ -15,7 +16,9 @@ SPRITES = pygame.sprite.Group() # Sprites holds all sprites used within the game
 # Sprites being stored
 floor = ground.Floor(X_SCREEN, Y_SCREEN)
 player = user.User((Y_SCREEN - floor.floor_height),Y_SCREEN, X_SCREEN, 100, 100)
-SPRITES.add(floor, player)
+precip = rain.Rain(floor.floor_height, Y_SCREEN, X_SCREEN)
+
+SPRITES.add(floor, player, precip)
 
 
 while running:
@@ -27,6 +30,7 @@ while running:
 
     # update player movement
     player.update()
+    precip.update()
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("pink")
