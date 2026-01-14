@@ -19,7 +19,7 @@ class User(pygame.sprite.Sprite):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.jump_status = False
-        self.jump = self.screen_height * 0.15
+        self.jump = self.screen_height * 0.3
         self.speed = self.screen_width * 0.01
 
         # Create an image of the person

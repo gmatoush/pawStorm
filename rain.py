@@ -6,7 +6,7 @@ import random
 class Rain(pygame.sprite.Sprite):
 
     # Initialize the sprite
-    def __init__(self, floor_height, screen_height, screen_width):
+    def __init__(self, floor_height, screen_height, screen_width, x_pos):
 
         # Call the parent class
         pygame.sprite.Sprite.__init__(self)
@@ -21,18 +21,19 @@ class Rain(pygame.sprite.Sprite):
         
         # Create an image of the rain and randomly choose the color
         self.img = None
-        self.image = pygame.Surface([100, 100])
+        # TODO: Check the size of the image
+        self.image = pygame.Surface([self.screen_width * 0.1, self.screen_height * 0.1])
         
         if random.randint(0,1):
             self.image.fill("white")
-            
+
         else:
             self.image.fill("black")
 
         # Put user rectangle on the floor
         self.rect = self.image.get_rect()
         self.rect.bottom = 0
-        self.rect.right = 200
+        self.rect.right = x_pos
 
     
     # Function that makes the rain fall and kill it if touches palyer or ground
