@@ -3,6 +3,7 @@ import pygame
 import ground
 import user
 import storm
+import score
 
 # pygame setup
 pygame.init()
@@ -17,6 +18,7 @@ SCORE = 0
 floor = ground.Floor(X_SCREEN, Y_SCREEN)
 player = user.User((Y_SCREEN - floor.floor_height),Y_SCREEN, X_SCREEN, 100, 100)
 precip = storm.Storm(floor.floor_height, Y_SCREEN, X_SCREEN)
+score_board = score.Scoreboard(pygame.font.SysFont(None, 40), X_SCREEN, Y_SCREEN)
 
 SPRITES.add(floor, player)
 
@@ -41,11 +43,11 @@ while running:
     SPRITES.draw(screen)
     precip.update(dt_ms)
     precip.draw(screen)
+    score_board.draw(screen)
 
     # Count it a score if the player touches a raindrop
     if pygame.sprite.spritecollide(player, precip.drops, True):
-        SCORE += 1
-    print(SCORE)
+        score_board.score += 1
 
     # flip() the display to put your work on screen
     pygame.display.flip()
