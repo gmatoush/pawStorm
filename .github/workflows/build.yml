@@ -62,15 +62,16 @@ jobs:
           rm -rf build
           rm -rf dist
 
-      # 🚨 CRITICAL FIX: NO --onefile ON macOS
+      # ✅ macOS build: NO --onefile, USE .icns
       - name: Build macOS app
         run: >
           pyinstaller --windowed
+          --icon=icon.icns
           --add-data "assets:assets"
           --name PawStorm
           main.py
 
-      # 🚨 ZIP FROM OUTSIDE THE .app
+      # ✅ Zip the .app bundle, not its contents
       - name: Zip macOS app correctly
         run: |
           cd dist

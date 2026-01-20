@@ -21,7 +21,7 @@ class Scoreboard:
     # Function to draw the scoreboard onto the screen
     def draw(self, screen):
         text = self.font.render((f"Score: {self.score}"), True, self.color)
-        screen.blit(text, (self.width - (self.width * 0.1), self.height * 0.95))
+        screen.blit(text, (self.width - (self.width * 0.15), self.height * 0.95))
 
     def resize(self, max_width, floor_height):
         self.width = max_width
