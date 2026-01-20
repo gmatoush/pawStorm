@@ -15,7 +15,9 @@ class Storm:
         self.screen_width = screen_width
 
         #Necessary variables for spawning more raindrops
-        self.spawn_interval_ms = 1000
+        self.base_spawn_interval_ms = 1000
+        self.min_spawn_interval_ms = 300
+        self.spawn_interval_ms = self.base_spawn_interval_ms
         self.timer = 0
         self.drops = pygame.sprite.Group()
 
@@ -54,6 +56,10 @@ class Storm:
         self.screen_width = screen_width
         for drop in self.drops.sprites():
             drop.resize(floor_height, screen_height, screen_width)
+
+    def set_difficulty(self, level):
+        interval = self.base_spawn_interval_ms - (level * 60)
+        self.spawn_interval_ms = max(self.min_spawn_interval_ms, interval)
 
             
     

@@ -1,5 +1,8 @@
 # Example file showing a basic pygame "game loop"
+import json
+import os
 import pygame
+import random
 import ground
 import user
 import storm
@@ -26,7 +29,7 @@ def create_game_state(x_screen, y_screen, base_animals):
     player = user.User((y_screen - floor.floor_height), y_screen, x_screen, 351, 180)
     precip = storm.Storm(floor.floor_height, y_screen, x_screen)
     score_board = score.Scoreboard(pygame.font.SysFont(None, 40), x_screen, y_screen)
-    lightning = enemy.Enemy(floor.floor_height, y_screen, x_screen)
+    lightning = enemy.Enemy(floor.floor_height, y_screen, x_screen, player.rect.width, tornado_warning_sfx)
     health_bar = health.Health((y_screen - floor.floor_height * 0.25), 64, 88)
     health_bar.spawn_health()
     sprites = pygame.sprite.Group()
@@ -58,6 +61,11 @@ thunder_sfx = pygame.mixer.Sound(utils.resource_path("assets/audio/thunder.mp3")
 death_sfx = pygame.mixer.Sound(utils.resource_path("assets/audio/death.mp3"))
 cat_sfx = pygame.mixer.Sound(utils.resource_path("assets/audio/cat.mp3"))
 dog_sfx = pygame.mixer.Sound(utils.resource_path("assets/audio/dog.mp3"))
+tornado_warning_sfx = pygame.mixer.Sound(utils.resource_path("assets/audio/tornado_warning.mp3"))
+tornado_sfx = pygame.mixer.Sound(utils.resource_path("assets/audio/torando_sound.mp3"))
+tornado_sfx.set_volume(1.0)
+tornado_channel = pygame.mixer.Channel(2)
+TORNADO_FADE_MS = 350
 start_sfx = pygame.mixer.Sound(start_music_path)
 start_channel = pygame.mixer.Channel(1)
 START_FADE_MS = 2000
@@ -65,6 +73,14 @@ START_VOLUME_INTRO = 0.5
 START_VOLUME_GAME = 0.2
 current_music_path = None
 current_state = "splash"
+HIGH_SCORES_PATH = os.path.join(os.path.abspath("."), "high_scores.json")
+HIGH_SCORES_LIMIT = 10
+entering_name = False
+name_input = ""
+pending_score = 0
+score_saved = False
+last_difficulty_level = -1
+tornado_audio_active = False
 
 def play_music(path, loops=-1):
     global current_music_path
@@ -79,6 +95,44 @@ def play_start_audio(loops=-1):
         return
     start_channel.set_volume(START_VOLUME_INTRO)
     start_channel.play(start_sfx, loops=loops, fade_ms=START_FADE_MS)
+
+def load_high_scores(path):
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except (OSError, json.JSONDecodeError):
+        return []
+    if not isinstance(data, list):
+        return []
+    cleaned = []
+    for entry in data:
+        if not isinstance(entry, dict):
+            continue
+        name = entry.get("name")
+        score_value = entry.get("score")
+        if isinstance(name, str) and isinstance(score_value, int):
+            cleaned.append({"name": name[:12], "score": score_value})
+    cleaned.sort(key=lambda item: item["score"], reverse=True)
+    return cleaned[:HIGH_SCORES_LIMIT]
+
+def save_high_scores(path, scores):
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(scores, handle, indent=2)
+
+def is_high_score(score_value, scores):
+    if len(scores) < HIGH_SCORES_LIMIT:
+        return True
+    lowest = min(item["score"] for item in scores)
+    return score_value > lowest
+
+def insert_high_score(scores, name, score_value):
+    scores.append({"name": name, "score": score_value})
+    scores.sort(key=lambda item: item["score"], reverse=True)
+    return scores[:HIGH_SCORES_LIMIT]
+
+high_scores = load_high_scores(HIGH_SCORES_PATH)
 
 
 # Sprites being stored
@@ -129,7 +183,19 @@ while running:
             if event.key in (pygame.K_RETURN, pygame.K_SPACE):
                 game_started = True
         elif event.type == pygame.KEYDOWN and game_over:
-            if event.key == pygame.K_SPACE:
+            if entering_name:
+                if event.key == pygame.K_RETURN:
+                    trimmed_name = name_input.strip() or "Player"
+                    high_scores = insert_high_score(high_scores, trimmed_name[:12], pending_score)
+                    save_high_scores(HIGH_SCORES_PATH, high_scores)
+                    entering_name = False
+                    score_saved = True
+                elif event.key == pygame.K_BACKSPACE:
+                    name_input = name_input[:-1]
+                elif event.unicode and len(name_input) < 12:
+                    if event.unicode.isalnum() or event.unicode in (" ", "_", "-"):
+                        name_input += event.unicode
+            elif event.key == pygame.K_SPACE:
                 floor, player, precip, score_board, lightning, health_bar, SPRITES, end_animals = create_game_state(
                     X_SCREEN,
                     Y_SCREEN,
@@ -137,6 +203,12 @@ while running:
                 )
                 game_over = False
                 game_started = True
+                entering_name = False
+                name_input = ""
+                pending_score = 0
+                score_saved = False
+                last_difficulty_level = -1
+                tornado_audio_active = False
 
     if show_splash:
         if pygame.time.get_ticks() - splash_start_ms >= splash_duration_ms:
@@ -200,21 +272,32 @@ while running:
             screen.blit(animal, rect)
             x = rect.right + gap
 
-        end_text = score_board.font.render("THE END", True, score_board.color)
-        score_text = score_board.font.render((f"Score: {score_board.score}"), True, score_board.color)
         prompt_text = score_board.font.render("Press SPACE to start again", True, score_board.color)
-
-        end_rect = end_text.get_rect()
-        end_rect.center = (X_SCREEN // 2, (Y_SCREEN // 2) - end_text.get_height())
-        screen.blit(end_text, end_rect)
-
-        score_rect = score_text.get_rect()
-        score_rect.center = (X_SCREEN // 2, Y_SCREEN // 2)
-        screen.blit(score_text, score_rect)
-
         prompt_rect = prompt_text.get_rect()
-        prompt_rect.center = (X_SCREEN // 2, (Y_SCREEN // 2) + score_text.get_height() + 10)
+        prompt_rect.center = (X_SCREEN // 2, Y_SCREEN - (prompt_text.get_height() * 2))
         screen.blit(prompt_text, prompt_rect)
+
+        scores_title = score_board.font.render("High Scores", True, score_board.color)
+        title_rect = scores_title.get_rect()
+        title_rect.centerx = X_SCREEN // 2
+        title_rect.top = int(Y_SCREEN * 0.05)
+        screen.blit(scores_title, title_rect)
+
+        list_y = title_rect.bottom + 10
+        if entering_name:
+            name_prompt = score_board.font.render(f"New High Score! Name: {name_input}", True, score_board.color)
+            name_rect = name_prompt.get_rect()
+            name_rect.centerx = X_SCREEN // 2
+            name_rect.top = list_y
+            screen.blit(name_prompt, name_rect)
+            list_y = name_rect.bottom + 8
+        for i, entry in enumerate(high_scores[:HIGH_SCORES_LIMIT], start=1):
+            line = score_board.font.render(f"{i}. {entry['name']} - {entry['score']}", True, score_board.color)
+            line_rect = line.get_rect()
+            line_rect.centerx = X_SCREEN // 2
+            line_rect.top = list_y
+            screen.blit(line, line_rect)
+            list_y = line_rect.bottom + 6
         pygame.display.flip()
         clock.tick(60)
         continue
@@ -238,6 +321,13 @@ while running:
     precip.draw(screen)
     lightning.update(dt_ms)
     lightning.draw(screen)
+    if lightning.tornadoes:
+        if not tornado_audio_active:
+            tornado_channel.play(tornado_sfx, loops=-1, fade_ms=TORNADO_FADE_MS)
+            tornado_audio_active = True
+    elif tornado_audio_active:
+        tornado_channel.fadeout(TORNADO_FADE_MS)
+        tornado_audio_active = False
     health_bar.draw(screen)
     score_board.draw(screen)
 
@@ -250,6 +340,12 @@ while running:
                 dog_sfx.play()
             elif getattr(drop, "animal_type", None) == "cat":
                 cat_sfx.play()
+
+    difficulty_level = score_board.score // 10
+    if difficulty_level != last_difficulty_level:
+        precip.set_difficulty(difficulty_level)
+        lightning.set_difficulty(difficulty_level)
+        last_difficulty_level = difficulty_level
     
     if pygame.sprite.spritecollide(player, lightning.enemies, True):
         thunder_sfx.play()
@@ -259,6 +355,24 @@ while running:
             game_over = True
             player.pos_y = player.floor_height
             player.rect.bottom = player.pos_y
+            pending_score = score_board.score
+            if is_high_score(pending_score, high_scores):
+                entering_name = True
+                name_input = ""
+                score_saved = False
+            else:
+                entering_name = False
+                score_saved = True
+    if pygame.sprite.spritecollide(player, lightning.tornadoes, False) and not game_over:
+        margin_x = int(player.rect.width * 0.5)
+        margin_y = int(player.rect.height * 0.5)
+        min_x = player.rect.width + margin_x
+        max_x = max(min_x, X_SCREEN - margin_x)
+        min_y = player.rect.height + margin_y
+        max_y = max(min_y, int(player.floor_height - margin_y))
+        target_x = random.randint(min_x, max_x)
+        target_y = random.randint(min_y, max_y)
+        player.start_throw(target_x, target_y)
 
     # flip() the display to put your work on screen
     pygame.display.flip()

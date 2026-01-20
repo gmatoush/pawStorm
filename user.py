@@ -23,6 +23,11 @@ class User(pygame.sprite.Sprite):
         self.jump_status = False
         self.jump = self.screen_height * 0.3
         self.speed = self.screen_width * 0.01
+        self.throw_active = False
+        self.throw_start = (self.pos_x, self.pos_y)
+        self.throw_target = (self.pos_x, self.pos_y)
+        self.throw_start_ms = 0
+        self.throw_duration_ms = 0
 
         # Create an image of the person
         self.right_flag = True # Creates a boolean flag saying that individual is moving right
@@ -61,6 +66,22 @@ class User(pygame.sprite.Sprite):
 
     # Function updating the position of the user
     def update(self):
+        if self.throw_active:
+            elapsed = pygame.time.get_ticks() - self.throw_start_ms
+            if elapsed >= self.throw_duration_ms:
+                self.pos_x, self.pos_y = self.throw_target
+                self.throw_active = False
+            else:
+                t = elapsed / self.throw_duration_ms
+                t = 1 - (1 - t) * (1 - t)
+                start_x, start_y = self.throw_start
+                target_x, target_y = self.throw_target
+                self.pos_x = start_x + (target_x - start_x) * t
+                self.pos_y = start_y + (target_y - start_y) * t
+            self.rect.bottom = self.pos_y
+            self.rect.right = self.pos_x
+            return
+
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
@@ -105,3 +126,10 @@ class User(pygame.sprite.Sprite):
 
         self.rect.bottom = self.pos_y
         self.rect.right = self.pos_x
+
+    def start_throw(self, target_x, target_y, duration_ms=450):
+        self.throw_active = True
+        self.throw_start = (self.pos_x, self.pos_y)
+        self.throw_target = (target_x, target_y)
+        self.throw_start_ms = pygame.time.get_ticks()
+        self.throw_duration_ms = max(1, duration_ms)
