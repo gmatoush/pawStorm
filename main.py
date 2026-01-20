@@ -16,7 +16,7 @@ SCORE = 0
 
 # Sprites being stored
 floor = ground.Floor(X_SCREEN, Y_SCREEN)
-player = user.User((Y_SCREEN - floor.floor_height),Y_SCREEN, X_SCREEN, 100, 100)
+player = user.User((Y_SCREEN - floor.floor_height),Y_SCREEN, X_SCREEN, 351, 180) #TODO: Change to scale properly
 precip = storm.Storm(floor.floor_height, Y_SCREEN, X_SCREEN)
 score_board = score.Scoreboard(pygame.font.SysFont(None, 40), X_SCREEN, Y_SCREEN)
 

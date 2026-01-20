@@ -11,7 +11,7 @@ class Floor(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         # Store important sprite variables
-        self.floor_height = int(y_max_height * 0.05)
+        self.floor_height = int(y_max_height * 0.1)
 
         # Load and scale image
         self.image = pygame.image.load("assets/grounds/ground1.png").convert_alpha()

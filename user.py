@@ -16,6 +16,7 @@ class User(pygame.sprite.Sprite):
         self.pos_y = floor_height
         self.jump_percent = 0.1
         self.user_width = user_width
+        self.user_height = user_height
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.jump_status = False
@@ -23,9 +24,13 @@ class User(pygame.sprite.Sprite):
         self.speed = self.screen_width * 0.01
 
         # Create an image of the person
-        self.img = None # placeholder for actual sprite
-        self.image = pygame.Surface([user_width, user_height])
-        self.image.fill("black")
+        self.right_flag = True # Creates a boolean flag saying that individual is moving right
+        self.image = pygame.image.load("assets/sprites/person/user.png").convert_alpha()
+        scale = self.user_height / self.image.get_height()
+        new_w = int(self.image.get_width() * scale)
+        self.image = pygame.transform.smoothscale(self.image, (new_w, self.user_height))
+        self.image_right = self.image
+        self.image_left = pygame.transform.flip(self.image_right, True, False)
 
         # Put user rectangle on the floor
         self.rect = self.image.get_rect()
@@ -41,12 +46,22 @@ class User(pygame.sprite.Sprite):
             # make sure player cannot exit the screen
             if self.pos_x >= self.user_width:
                 self.pos_x -= self.speed
+            
+            # make sure it is facing left
+            if self.right_flag:
+                self.image = self.image_left
+                self.right_flag = False
         
         if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
 
             # make sure player cannot exit the screen
             if self.pos_x <= self.screen_width:
                 self.pos_x += self.speed
+
+            # make sure player is facing right
+            if not self.right_flag:
+                self.image = self.image_right
+                self.right_flag = True
 
         if keys[pygame.K_w] or keys[pygame.K_UP]:
 
