@@ -19,8 +19,18 @@ jobs:
       - name: Install dependencies
         run: pip install pygame pyinstaller
 
+      - name: Clean old builds
+        run: |
+          if exist build rmdir /s /q build
+          if exist dist rmdir /s /q dist
+
       - name: Build Windows executable
-        run: pyinstaller --onefile --windowed --add-data "assets;assets" --name PawStorm main.py
+        run: >
+          pyinstaller --onefile --windowed
+          --add-data "assets;assets"
+          --icon=icon.ico
+          --name PawStorm
+          main.py
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -41,8 +51,17 @@ jobs:
       - name: Install dependencies
         run: pip install pygame pyinstaller
 
+      - name: Clean old builds
+        run: |
+          rm -rf build
+          rm -rf dist
+
       - name: Build macOS app
-        run: pyinstaller --windowed --onefile --name PawStorm main.py
+        run: >
+          pyinstaller --windowed --onefile
+          --add-data "assets:assets"
+          --name PawStorm
+          main.py
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
