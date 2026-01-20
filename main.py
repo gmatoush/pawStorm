@@ -9,6 +9,7 @@ import storm
 import score
 import enemy
 import health
+import health_pickup
 import utils
 
 
@@ -30,12 +31,13 @@ def create_game_state(x_screen, y_screen, base_animals):
     precip = storm.Storm(floor.floor_height, y_screen, x_screen)
     score_board = score.Scoreboard(pygame.font.SysFont(None, 40), x_screen, y_screen)
     lightning = enemy.Enemy(floor.floor_height, y_screen, x_screen, player.rect.width, tornado_warning_sfx)
+    heart_pickups = health_pickup.HealthPickups(floor.floor_height, y_screen, x_screen)
     health_bar = health.Health((y_screen - floor.floor_height * 0.25), 64, 88)
     health_bar.spawn_health()
     sprites = pygame.sprite.Group()
     sprites.add(floor, player)
     end_animals = scale_animals(base_animals, int(floor.floor_height * 0.7))
-    return floor, player, precip, score_board, lightning, health_bar, sprites, end_animals
+    return floor, player, precip, score_board, lightning, heart_pickups, health_bar, sprites, end_animals
 
 # pygame setup
 pygame.init()
@@ -152,7 +154,7 @@ base_animals = [
     pygame.image.load(utils.resource_path("assets/sprites/cats/cat2.png")).convert_alpha(),
     pygame.image.load(utils.resource_path("assets/sprites/cats/cat3.png")).convert_alpha(),
 ]
-floor, player, precip, score_board, lightning, health_bar, SPRITES, end_animals = create_game_state(
+floor, player, precip, score_board, lightning, heart_pickups, health_bar, SPRITES, end_animals = create_game_state(
     X_SCREEN,
     Y_SCREEN,
     base_animals,
@@ -176,6 +178,7 @@ while running:
             player.resize(Y_SCREEN - floor.floor_height, Y_SCREEN, X_SCREEN)
             precip.resize(floor.floor_height, Y_SCREEN, X_SCREEN)
             lightning.resize(floor.floor_height, Y_SCREEN, X_SCREEN)
+            heart_pickups.resize(floor.floor_height, Y_SCREEN, X_SCREEN)
             health_bar.resize(Y_SCREEN - floor.floor_height * 0.25, 64, 88)
             score_board.resize(X_SCREEN, Y_SCREEN)
             end_animals = scale_animals(base_animals, int(floor.floor_height * 0.7))
@@ -196,7 +199,7 @@ while running:
                     if event.unicode.isalnum() or event.unicode in (" ", "_", "-"):
                         name_input += event.unicode
             elif event.key == pygame.K_SPACE:
-                floor, player, precip, score_board, lightning, health_bar, SPRITES, end_animals = create_game_state(
+                floor, player, precip, score_board, lightning, heart_pickups, health_bar, SPRITES, end_animals = create_game_state(
                     X_SCREEN,
                     Y_SCREEN,
                     base_animals,
@@ -328,8 +331,28 @@ while running:
     elif tornado_audio_active:
         tornado_channel.fadeout(TORNADO_FADE_MS)
         tornado_audio_active = False
+    heart_pickups.update(dt_ms)
+    heart_pickups.draw(screen)
     health_bar.draw(screen)
     score_board.draw(screen)
+
+    missed = precip.consume_missed()
+    if missed:
+        for _ in range(missed):
+            health_bar.update()
+        if health_bar.lives <= 0 and not game_over:
+            death_sfx.play()
+            game_over = True
+            player.pos_y = player.floor_height
+            player.rect.bottom = player.pos_y
+            pending_score = score_board.score
+            if is_high_score(pending_score, high_scores):
+                entering_name = True
+                name_input = ""
+                score_saved = False
+            else:
+                entering_name = False
+                score_saved = True
 
     # Count it a score if the player touches a raindrop
     captured = pygame.sprite.spritecollide(player, precip.drops, True)
@@ -340,6 +363,9 @@ while running:
                 dog_sfx.play()
             elif getattr(drop, "animal_type", None) == "cat":
                 cat_sfx.play()
+
+    if pygame.sprite.spritecollide(player, heart_pickups.drops, True):
+        health_bar.add_life()
 
     difficulty_level = score_board.score // 10
     if difficulty_level != last_difficulty_level:

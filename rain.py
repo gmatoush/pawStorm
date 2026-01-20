@@ -21,6 +21,7 @@ class Rain(pygame.sprite.Sprite):
         self.floor_height = floor_height
         self.width = rain_width
         self.height = rain_height
+        self.missed = False
         
         # Create an image of the rain and randomly choose the animal
         self.cats = ["cat1.png", "cat2.png", "cat3.png"]
@@ -57,7 +58,7 @@ class Rain(pygame.sprite.Sprite):
             self.rect.bottom = self.pos_y
 
         if self.rect.bottom >= (self.screen_height - self.floor_height):
-            self.kill()
+            self.missed = True
 
     def resize(self, floor_height, screen_height, screen_width):
         self.floor_height = floor_height

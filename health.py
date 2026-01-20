@@ -15,6 +15,7 @@ class Health:
         self.height = height
         self.health = pygame.sprite.Group()
         self.lives = 3
+        self.max_lives = 5
 
     
     # Create a function that spawns the health bar
@@ -41,6 +42,12 @@ class Health:
         hearts = self.health.sprites()
         if hearts:
             hearts[-1].kill()
+
+    def add_life(self):
+        if self.lives >= self.max_lives:
+            return
+        self.lives += 1
+        self.spawn_health()
 
     def resize(self, floor_height, width, height):
         self.floor_height = floor_height

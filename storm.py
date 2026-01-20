@@ -20,6 +20,7 @@ class Storm:
         self.spawn_interval_ms = self.base_spawn_interval_ms
         self.timer = 0
         self.drops = pygame.sprite.Group()
+        self.missed_count = 0
 
     # Create a function that randomly spawns drops
     def spawn_drop(self):
@@ -49,6 +50,10 @@ class Storm:
 
         # always update all the drops
         self.drops.update()
+        for drop in list(self.drops):
+            if getattr(drop, "missed", False):
+                drop.kill()
+                self.missed_count += 1
 
     def resize(self, floor_height, screen_height, screen_width):
         self.floor_height = floor_height
@@ -60,6 +65,11 @@ class Storm:
     def set_difficulty(self, level):
         interval = self.base_spawn_interval_ms - (level * 60)
         self.spawn_interval_ms = max(self.min_spawn_interval_ms, interval)
+
+    def consume_missed(self):
+        count = self.missed_count
+        self.missed_count = 0
+        return count
 
             
     
