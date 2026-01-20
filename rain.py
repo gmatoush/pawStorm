@@ -26,13 +26,15 @@ class Rain(pygame.sprite.Sprite):
         self.cats = ["cat1.png", "cat2.png", "cat3.png"]
         self.dogs = ["dog1.png", "dog2.png", "dog3.png"]
         
-        idx = random.randint(0,2)
-        if random.randint(0,1):
+        idx = random.randint(0, 2)
+        if random.randint(0, 1):
+            self.animal_type = "dog"
             self.image = pygame.image.load(
                 utils.resource_path(f"assets/sprites/dogs/{self.dogs[idx]}")
             )
 
         else:
+            self.animal_type = "cat"
             self.image = pygame.image.load(
                 utils.resource_path(f"assets/sprites/cats/{self.cats[idx]}")
             )

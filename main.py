@@ -36,6 +36,7 @@ def create_game_state(x_screen, y_screen, base_animals):
 
 # pygame setup
 pygame.init()
+pygame.mixer.init()
 screen = pygame.display.set_mode(
     (1280, 720),
     pygame.RESIZABLE)
@@ -46,10 +47,39 @@ running = True
 game_started = False
 game_over = False
 splash_start_ms = pygame.time.get_ticks()
-splash_duration_ms = 5000
+splash_duration_ms = 3000
 show_splash = True
 SPRITES = pygame.sprite.Group() # Sprites holds all sprites used within the game
-SCORE = 0
+
+start_music_path = utils.resource_path("assets/audio/start.mp3")
+end_music_path = utils.resource_path("assets/audio/end.mp3")
+rain_music_path = utils.resource_path("assets/audio/rain.mp3")
+thunder_sfx = pygame.mixer.Sound(utils.resource_path("assets/audio/thunder.mp3"))
+death_sfx = pygame.mixer.Sound(utils.resource_path("assets/audio/death.mp3"))
+cat_sfx = pygame.mixer.Sound(utils.resource_path("assets/audio/cat.mp3"))
+dog_sfx = pygame.mixer.Sound(utils.resource_path("assets/audio/dog.mp3"))
+start_sfx = pygame.mixer.Sound(start_music_path)
+start_channel = pygame.mixer.Channel(1)
+START_FADE_MS = 2000
+START_VOLUME_INTRO = 0.5
+START_VOLUME_GAME = 0.2
+current_music_path = None
+current_state = "splash"
+
+def play_music(path, loops=-1):
+    global current_music_path
+    if current_music_path == path:
+        return
+    pygame.mixer.music.load(path)
+    pygame.mixer.music.play(loops=loops)
+    current_music_path = path
+
+def play_start_audio(loops=-1):
+    if start_channel.get_busy():
+        return
+    start_channel.set_volume(START_VOLUME_INTRO)
+    start_channel.play(start_sfx, loops=loops, fade_ms=START_FADE_MS)
+
 
 # Sprites being stored
 base_start_bg = pygame.image.load(utils.resource_path("assets/backgrounds/start.png")).convert()
@@ -111,6 +141,7 @@ while running:
     if show_splash:
         if pygame.time.get_ticks() - splash_start_ms >= splash_duration_ms:
             show_splash = False
+            thunder_sfx.play()
         else:
             screen.blit(splash_bg, (0, 0))
             pygame.display.flip()
@@ -118,6 +149,9 @@ while running:
             continue
 
     if not game_started:
+        if current_state != "start":
+            play_start_audio(loops=-1)
+            current_state = "start"
         screen.blit(start_bg, (0, 0))
         intro_lines = [
             "Can you catch all of the animals?",
@@ -142,6 +176,10 @@ while running:
         clock.tick(60)
         continue
     if game_over:
+        if current_state != "end":
+            start_channel.stop()
+            play_music(end_music_path, loops=-1)
+            current_state = "end"
         screen.blit(end_bg, (0, 0))
         screen.blit(floor.image, floor.rect)
         player.rect.bottom = floor.rect.top
@@ -181,6 +219,11 @@ while running:
         clock.tick(60)
         continue
 
+    if current_state != "game":
+        play_music(rain_music_path, loops=-1)
+        start_channel.set_volume(START_VOLUME_GAME)
+        current_state = "game"
+        
     # update player movement
     player.update()
 
@@ -199,12 +242,20 @@ while running:
     score_board.draw(screen)
 
     # Count it a score if the player touches a raindrop
-    if pygame.sprite.spritecollide(player, precip.drops, True):
-        score_board.score += 1
+    captured = pygame.sprite.spritecollide(player, precip.drops, True)
+    if captured:
+        score_board.score += len(captured)
+        for drop in captured:
+            if getattr(drop, "animal_type", None) == "dog":
+                dog_sfx.play()
+            elif getattr(drop, "animal_type", None) == "cat":
+                cat_sfx.play()
     
     if pygame.sprite.spritecollide(player, lightning.enemies, True):
+        thunder_sfx.play()
         health_bar.update()
-        if health_bar.lives <= 0:
+        if health_bar.lives <= 0 and not game_over:
+            death_sfx.play()
             game_over = True
             player.pos_y = player.floor_height
             player.rect.bottom = player.pos_y

@@ -41,6 +41,11 @@ class Lightning(pygame.sprite.Sprite):
         if self.rect.bottom >= (self.screen_height - self.floor_height):
             self.kill()
 
+            # Make thunder
+            thunder_music_path = utils.resource_path("assets/audio/thunder.mp3")
+            pygame.mixer.music.load(thunder_music_path)
+            pygame.mixer.music.play()
+
     def resize(self, floor_height, screen_height, screen_width):
         self.floor_height = floor_height
         self.screen_height = screen_height
