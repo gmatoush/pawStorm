@@ -45,6 +45,9 @@ clock = pygame.time.Clock()
 running = True
 game_started = False
 game_over = False
+splash_start_ms = pygame.time.get_ticks()
+splash_duration_ms = 5000
+show_splash = True
 SPRITES = pygame.sprite.Group() # Sprites holds all sprites used within the game
 SCORE = 0
 
@@ -52,9 +55,11 @@ SCORE = 0
 base_start_bg = pygame.image.load(utils.resource_path("assets/backgrounds/start.png")).convert()
 base_game_bg = pygame.image.load(utils.resource_path("assets/backgrounds/background.png")).convert()
 base_end_bg = pygame.image.load(utils.resource_path("assets/backgrounds/end.png")).convert()
+base_splash = pygame.image.load(utils.resource_path("assets/icon/icon.png")).convert_alpha()
 start_bg = pygame.transform.smoothscale(base_start_bg, (X_SCREEN, Y_SCREEN))
 game_bg = pygame.transform.smoothscale(base_game_bg, (X_SCREEN, Y_SCREEN))
 end_bg = pygame.transform.smoothscale(base_end_bg, (X_SCREEN, Y_SCREEN))
+splash_bg = pygame.transform.smoothscale(base_splash, (X_SCREEN, Y_SCREEN))
 base_animals = [
     pygame.image.load(utils.resource_path("assets/sprites/dogs/dog1.png")).convert_alpha(),
     pygame.image.load(utils.resource_path("assets/sprites/dogs/dog2.png")).convert_alpha(),
@@ -82,6 +87,7 @@ while running:
             start_bg = pygame.transform.smoothscale(base_start_bg, (X_SCREEN, Y_SCREEN))
             game_bg = pygame.transform.smoothscale(base_game_bg, (X_SCREEN, Y_SCREEN))
             end_bg = pygame.transform.smoothscale(base_end_bg, (X_SCREEN, Y_SCREEN))
+            splash_bg = pygame.transform.smoothscale(base_splash, (X_SCREEN, Y_SCREEN))
             floor.resize(X_SCREEN, Y_SCREEN)
             player.resize(Y_SCREEN - floor.floor_height, Y_SCREEN, X_SCREEN)
             precip.resize(floor.floor_height, Y_SCREEN, X_SCREEN)
@@ -101,6 +107,15 @@ while running:
                 )
                 game_over = False
                 game_started = True
+
+    if show_splash:
+        if pygame.time.get_ticks() - splash_start_ms >= splash_duration_ms:
+            show_splash = False
+        else:
+            screen.blit(splash_bg, (0, 0))
+            pygame.display.flip()
+            clock.tick(60)
+            continue
 
     if not game_started:
         screen.blit(start_bg, (0, 0))
