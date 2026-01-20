@@ -5,6 +5,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write   # REQUIRED to create releases
+
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -33,11 +36,13 @@ jobs:
           --name PawStorm
           main.py
 
-      - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+      - name: Zip Windows build
+        run: Compress-Archive dist/PawStorm.exe PawStorm-Windows.zip
+
+      - name: Upload Windows to Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: PawStorm-Windows
-          path: dist/PawStorm.exe
+          files: PawStorm-Windows.zip
 
   build-macos:
     runs-on: macos-latest
@@ -57,15 +62,21 @@ jobs:
           rm -rf build
           rm -rf dist
 
+      # 🚨 CRITICAL FIX: NO --onefile ON macOS
       - name: Build macOS app
         run: >
-          pyinstaller --windowed --onefile
+          pyinstaller --windowed
           --add-data "assets:assets"
           --name PawStorm
           main.py
 
-      - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
+      # 🚨 ZIP FROM OUTSIDE THE .app
+      - name: Zip macOS app correctly
+        run: |
+          cd dist
+          zip -r PawStorm-macOS.zip PawStorm.app
+
+      - name: Upload macOS to Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: PawStorm-macOS
-          path: dist/PawStorm.app
+          files: dist/PawStorm-macOS.zip
