@@ -20,9 +20,10 @@ jobs:
         run: pip install pygame pyinstaller
 
       - name: Clean old builds
+        shell: powershell
         run: |
-          if exist build rmdir /s /q build
-          if exist dist rmdir /s /q dist
+          if (Test-Path build) { Remove-Item build -Recurse -Force }
+          if (Test-Path dist) { Remove-Item dist -Recurse -Force }
 
       - name: Build Windows executable
         run: >
