@@ -25,14 +25,35 @@ class User(pygame.sprite.Sprite):
 
         # Create an image of the person
         self.right_flag = True # Creates a boolean flag saying that individual is moving right
-        self.image = pygame.image.load("assets/sprites/person/user.png").convert_alpha()
-        scale = self.user_height / self.image.get_height()
-        new_w = int(self.image.get_width() * scale)
-        self.image = pygame.transform.smoothscale(self.image, (new_w, self.user_height))
+        self.base_image = pygame.image.load("assets/sprites/person/user.png").convert_alpha()
+        scale = self.user_height / self.base_image.get_height()
+        new_w = int(self.base_image.get_width() * scale)
+        self.image = pygame.transform.smoothscale(self.base_image, (new_w, self.user_height))
         self.image_right = self.image
         self.image_left = pygame.transform.flip(self.image_right, True, False)
 
         # Put user rectangle on the floor
+        self.rect = self.image.get_rect()
+        self.rect.bottom = self.pos_y
+        self.rect.right = self.pos_x
+
+    def resize(self, floor_height, screen_height, screen_width):
+        self.floor_height = floor_height
+        self.screen_height = screen_height
+        self.screen_width = screen_width
+        self.jump = self.screen_height * 0.3
+        self.speed = self.screen_width * 0.01
+
+        scale = self.user_height / self.base_image.get_height()
+        new_w = int(self.base_image.get_width() * scale)
+        self.image = pygame.transform.smoothscale(self.base_image, (new_w, self.user_height))
+        self.image_right = self.image
+        self.image_left = pygame.transform.flip(self.image_right, True, False)
+
+        if self.pos_y >= self.floor_height:
+            self.pos_y = self.floor_height
+
+        self.pos_x = min(max(self.pos_x, self.rect.width), self.screen_width)
         self.rect = self.image.get_rect()
         self.rect.bottom = self.pos_y
         self.rect.right = self.pos_x
@@ -75,8 +96,10 @@ class User(pygame.sprite.Sprite):
         elif self.jump_status and self.pos_y != max_jump:
             self.pos_y -= self.jump * self.jump_percent
 
-        elif self.pos_y != self.floor_height:
-            self.pos_y += self.jump * self.jump_percent
+        elif self.pos_y < self.floor_height:
+            self.pos_y = min(self.floor_height, self.pos_y + (self.jump * self.jump_percent))
+        elif self.pos_y > self.floor_height:
+            self.pos_y = self.floor_height
 
 
         self.rect.bottom = self.pos_y

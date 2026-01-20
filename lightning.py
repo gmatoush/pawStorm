@@ -40,4 +40,10 @@ class Lightning(pygame.sprite.Sprite):
         if self.rect.bottom >= (self.screen_height - self.floor_height):
             self.kill()
 
+    def resize(self, floor_height, screen_height, screen_width):
+        self.floor_height = floor_height
+        self.screen_height = screen_height
+        self.screen_width = screen_width
+        self.speed = screen_height * 0.5
+
         

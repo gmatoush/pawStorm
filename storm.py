@@ -48,6 +48,13 @@ class Storm:
         # always update all the drops
         self.drops.update()
 
+    def resize(self, floor_height, screen_height, screen_width):
+        self.floor_height = floor_height
+        self.screen_height = screen_height
+        self.screen_width = screen_width
+        for drop in self.drops.sprites():
+            drop.resize(floor_height, screen_height, screen_width)
+
             
     
 

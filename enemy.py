@@ -73,3 +73,17 @@ class Enemy:
                     self.pending_strikes.remove(strike)
 
         self.enemies.update()
+
+    def resize(self, floor_height, screen_height, screen_width):
+        self.floor_height = floor_height
+        self.screen_height = screen_height
+        self.screen_width = screen_width
+
+        for warning in self.warnings.sprites():
+            warning.rect.bottom = self.screen_height - self.floor_height
+
+        for strike in self.pending_strikes:
+            strike["x_pos"] = min(max(strike["x_pos"], 0), self.screen_width)
+
+        for enemy in self.enemies.sprites():
+            enemy.resize(self.floor_height, self.screen_height, self.screen_width)
