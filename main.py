@@ -12,11 +12,6 @@ import health
 import health_pickup
 import utils
 
-
-icon = pygame.image.load(utils.resource_path("assets/icon/icon.png"))
-pygame.display.set_icon(icon)
-pygame.display.set_caption("Paw Storm")
-
 def scale_animals(base_animals, target_height):
     scaled = []
     for animal in base_animals:
@@ -47,6 +42,16 @@ screen = pygame.display.set_mode(
     pygame.RESIZABLE)
 
 X_SCREEN, Y_SCREEN = screen.get_size()
+loading_font = pygame.font.SysFont(None, 60)
+screen.fill((10, 10, 10))
+loading_text = loading_font.render("Loading...", True, "white")
+loading_rect = loading_text.get_rect(center=(X_SCREEN // 2, Y_SCREEN // 2))
+screen.blit(loading_text, loading_rect)
+pygame.display.flip()
+
+icon = pygame.image.load(utils.resource_path("assets/icon/icon.png"))
+pygame.display.set_icon(icon)
+pygame.display.set_caption("Paw Storm")
 clock = pygame.time.Clock()
 running = True
 game_started = False
