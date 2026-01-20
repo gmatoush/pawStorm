@@ -27,7 +27,8 @@ class Storm:
                                     round(self.screen_width * 0.8))
 
         # Create the drop and add it to the group
-        drop = Rain(self.floor_height, self.screen_height, self.screen_width, rain_x_pos)
+        # TODO: Calculate actual heights
+        drop = Rain(self.floor_height, self.screen_height, self.screen_width, rain_x_pos, 26 * 3, 30 * 3)
         self.drops.add(drop)
 
     # draw all of the drops

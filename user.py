@@ -44,8 +44,7 @@ class User(pygame.sprite.Sprite):
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             
             # make sure player cannot exit the screen
-            if self.pos_x >= self.user_width:
-                self.pos_x -= self.speed
+            self.pos_x = max(self.pos_x - self.speed, self.rect.width)
             
             # make sure it is facing left
             if self.right_flag:
@@ -55,8 +54,7 @@ class User(pygame.sprite.Sprite):
         if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
 
             # make sure player cannot exit the screen
-            if self.pos_x <= self.screen_width:
-                self.pos_x += self.speed
+            self.pos_x = min(self.pos_x + self.speed, self.screen_width)
 
             # make sure player is facing right
             if not self.right_flag:
