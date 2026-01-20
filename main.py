@@ -4,6 +4,7 @@ import ground
 import user
 import storm
 import score
+import enemy
 
 # pygame setup
 pygame.init()
@@ -19,6 +20,7 @@ floor = ground.Floor(X_SCREEN, Y_SCREEN)
 player = user.User((Y_SCREEN - floor.floor_height),Y_SCREEN, X_SCREEN, 351, 180) #TODO: Change to scale properly
 precip = storm.Storm(floor.floor_height, Y_SCREEN, X_SCREEN)
 score_board = score.Scoreboard(pygame.font.SysFont(None, 40), X_SCREEN, Y_SCREEN)
+lightning = enemy.Enemy(floor.floor_height, Y_SCREEN, X_SCREEN)
 
 SPRITES.add(floor, player)
 
@@ -43,6 +45,8 @@ while running:
     SPRITES.draw(screen)
     precip.update(dt_ms)
     precip.draw(screen)
+    lightning.update(dt_ms)
+    lightning.draw(screen)
     score_board.draw(screen)
 
     # Count it a score if the player touches a raindrop
