@@ -1,6 +1,7 @@
 
 # Class made to create the ground
 import pygame
+import utils
 
 class Floor(pygame.sprite.Sprite):
 
@@ -14,7 +15,7 @@ class Floor(pygame.sprite.Sprite):
         self.floor_height = int(y_max_height * 0.15)
 
         # Load and scale image
-        self.base_image = pygame.image.load("assets/grounds/ground1.png").convert_alpha()
+        self.base_image = pygame.image.load(utils.resource_path("assets/grounds/ground1.png")).convert_alpha()
         self.image = pygame.transform.scale(self.base_image, (x, self.floor_height))
 
         # Put rectangle around the floor 

@@ -1,6 +1,7 @@
 
 # Classes made to represent the enemies
 import pygame
+import utils
 
 class Lightning(pygame.sprite.Sprite):
 
@@ -21,7 +22,7 @@ class Lightning(pygame.sprite.Sprite):
         self.height = rain_height
         
         # load in the lightning bolt image
-        self.image = pygame.image.load(f"assets/sprites/enemies/lighting.png")
+        self.image = pygame.image.load(utils.resource_path("assets/sprites/enemies/lighting.png"))
 
         # Scale the image properly
         self.image = pygame.transform.smoothscale(self.image, (self.width, self.height))

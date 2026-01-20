@@ -6,9 +6,10 @@ import storm
 import score
 import enemy
 import health
+import utils
 
 
-icon = pygame.image.load("assets/icon/icon.png")
+icon = pygame.image.load(utils.resource_path("assets/icon/icon.png"))
 pygame.display.set_icon(icon)
 pygame.display.set_caption("Paw Storm")
 
@@ -48,19 +49,19 @@ SPRITES = pygame.sprite.Group() # Sprites holds all sprites used within the game
 SCORE = 0
 
 # Sprites being stored
-base_start_bg = pygame.image.load("assets/backgrounds/start.png").convert()
-base_game_bg = pygame.image.load("assets/backgrounds/background.png").convert()
-base_end_bg = pygame.image.load("assets/backgrounds/end.png").convert()
+base_start_bg = pygame.image.load(utils.resource_path("assets/backgrounds/start.png")).convert()
+base_game_bg = pygame.image.load(utils.resource_path("assets/backgrounds/background.png")).convert()
+base_end_bg = pygame.image.load(utils.resource_path("assets/backgrounds/end.png")).convert()
 start_bg = pygame.transform.smoothscale(base_start_bg, (X_SCREEN, Y_SCREEN))
 game_bg = pygame.transform.smoothscale(base_game_bg, (X_SCREEN, Y_SCREEN))
 end_bg = pygame.transform.smoothscale(base_end_bg, (X_SCREEN, Y_SCREEN))
 base_animals = [
-    pygame.image.load("assets/sprites/dogs/dog1.png").convert_alpha(),
-    pygame.image.load("assets/sprites/dogs/dog2.png").convert_alpha(),
-    pygame.image.load("assets/sprites/dogs/dog3.png").convert_alpha(),
-    pygame.image.load("assets/sprites/cats/cat1.png").convert_alpha(),
-    pygame.image.load("assets/sprites/cats/cat2.png").convert_alpha(),
-    pygame.image.load("assets/sprites/cats/cat3.png").convert_alpha(),
+    pygame.image.load(utils.resource_path("assets/sprites/dogs/dog1.png")).convert_alpha(),
+    pygame.image.load(utils.resource_path("assets/sprites/dogs/dog2.png")).convert_alpha(),
+    pygame.image.load(utils.resource_path("assets/sprites/dogs/dog3.png")).convert_alpha(),
+    pygame.image.load(utils.resource_path("assets/sprites/cats/cat1.png")).convert_alpha(),
+    pygame.image.load(utils.resource_path("assets/sprites/cats/cat2.png")).convert_alpha(),
+    pygame.image.load(utils.resource_path("assets/sprites/cats/cat3.png")).convert_alpha(),
 ]
 floor, player, precip, score_board, lightning, health_bar, SPRITES, end_animals = create_game_state(
     X_SCREEN,

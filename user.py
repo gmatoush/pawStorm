@@ -1,6 +1,7 @@
 
 # Class made to create the person
 import pygame
+import utils
 
 class User(pygame.sprite.Sprite):
 
@@ -25,7 +26,7 @@ class User(pygame.sprite.Sprite):
 
         # Create an image of the person
         self.right_flag = True # Creates a boolean flag saying that individual is moving right
-        self.base_image = pygame.image.load("assets/sprites/person/user.png").convert_alpha()
+        self.base_image = pygame.image.load(utils.resource_path("assets/sprites/person/user.png")).convert_alpha()
         scale = self.user_height / self.base_image.get_height()
         new_w = int(self.base_image.get_width() * scale)
         self.image = pygame.transform.smoothscale(self.base_image, (new_w, self.user_height))

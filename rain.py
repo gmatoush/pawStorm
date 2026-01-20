@@ -2,6 +2,7 @@
 # Class made to represent the rain following
 import pygame
 import random
+import utils
 
 class Rain(pygame.sprite.Sprite):
 
@@ -27,10 +28,14 @@ class Rain(pygame.sprite.Sprite):
         
         idx = random.randint(0,2)
         if random.randint(0,1):
-            self.image = pygame.image.load(f"assets/sprites/dogs/{self.dogs[idx]}")
+            self.image = pygame.image.load(
+                utils.resource_path(f"assets/sprites/dogs/{self.dogs[idx]}")
+            )
 
         else:
-            self.image = pygame.image.load(f"assets/sprites/cats/{self.cats[idx]}")
+            self.image = pygame.image.load(
+                utils.resource_path(f"assets/sprites/cats/{self.cats[idx]}")
+            )
 
         # Scale the image properly
         scale = self.height / self.image.get_height()

@@ -1,6 +1,7 @@
 # Class made to represent the health of the individual
 
 import pygame
+import utils
 
 class Heart(pygame.sprite.Sprite):
 
@@ -17,7 +18,7 @@ class Heart(pygame.sprite.Sprite):
         self.floor_height = floor_height
 
         # Load the iamge and scale it properly
-        self.image = pygame.image.load("assets/sprites/health/heart.png")
+        self.image = pygame.image.load(utils.resource_path("assets/sprites/health/heart.png"))
         scale = self.height / self.image.get_height()
         new_width = int(self.image.get_width() * scale)
         self.image = pygame.transform.smoothscale(self.image, (new_width, self.height))

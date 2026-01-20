@@ -1,6 +1,7 @@
 
 # Class made to represent the hazard warning for both enemies
 import pygame
+import utils
 
 class Hazard(pygame.sprite.Sprite):
 
@@ -16,7 +17,7 @@ class Hazard(pygame.sprite.Sprite):
         self.height = height
 
         # Load the iamge and scale it properly
-        self.image = pygame.image.load("assets/sprites/enemies/harzard.png")
+        self.image = pygame.image.load(utils.resource_path("assets/sprites/enemies/harzard.png"))
         scale = self.height / self.image.get_height()
         new_width = int(self.image.get_width() * scale)
         self.image = pygame.transform.smoothscale(self.image, (new_width, self.height))
