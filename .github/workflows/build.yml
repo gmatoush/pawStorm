@@ -6,7 +6,7 @@ on:
       - "v*"
 
 permissions:
-  contents: write   # REQUIRED to create releases
+  contents: write
 
 jobs:
   build-windows:
@@ -36,8 +36,21 @@ jobs:
           --name PawStorm
           main.py
 
-      - name: Zip Windows build
-        run: Compress-Archive dist/PawStorm.exe PawStorm-Windows.zip
+      - name: Create Windows shortcut
+        shell: powershell
+        run: |
+          mkdir package
+          Copy-Item dist\PawStorm.exe package\
+          Copy-Item assets package\assets -Recurse
+          $WshShell = New-Object -ComObject WScript.Shell
+          $Shortcut = $WshShell.CreateShortcut("package\Paw Storm.lnk")
+          $Shortcut.TargetPath = "$PWD\package\PawStorm.exe"
+          $Shortcut.WorkingDirectory = "$PWD\package"
+          $Shortcut.IconLocation = "$PWD\package\PawStorm.exe"
+          $Shortcut.Save()
+
+      - name: Zip Windows package
+        run: Compress-Archive package PawStorm-Windows.zip
 
       - name: Upload Windows to Release
         uses: softprops/action-gh-release@v2
@@ -61,8 +74,8 @@ jobs:
         run: |
           rm -rf build
           rm -rf dist
+          rm -rf package
 
-      # ✅ macOS build: NO --onefile, USE .icns
       - name: Build macOS app
         run: >
           pyinstaller --windowed
@@ -71,13 +84,18 @@ jobs:
           --name PawStorm
           main.py
 
-      # ✅ Zip the .app bundle, not its contents
-      - name: Zip macOS app correctly
+      - name: Create macOS alias
         run: |
-          cd dist
-          zip -r PawStorm-macOS.zip PawStorm.app
+          mkdir package
+          cp -R dist/PawStorm.app package/
+          ln -s PawStorm.app package/Paw\ Storm
+
+      - name: Zip macOS package
+        run: |
+          cd package
+          zip -r ../PawStorm-macOS.zip .
 
       - name: Upload macOS to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/PawStorm-macOS.zip
+          files: PawStorm-macOS.zip
